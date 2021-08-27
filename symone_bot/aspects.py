@@ -15,13 +15,21 @@ class Aspect:
     """
 
     def __init__(
-        self, name: str, help_info: str, value_type: Type = None, allowed_users=None
+        self,
+        name: str,
+        help_info: str,
+        value_type: Type = None,
+        extra_data=None,
+        allowed_users=None,
     ):
         if allowed_users is None:
             allowed_users = [GAME_MASTER]
+        if extra_data is None:
+            extra_data = dict()
         self.name = name
         self.help_info = help_info
         self.value_type = value_type
+        self.extra_data = extra_data
         self.allowed_users = allowed_users
 
     def help(self) -> str:

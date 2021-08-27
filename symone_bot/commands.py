@@ -65,6 +65,14 @@ def help_message(metadata: QueryMetaData) -> dict:
 
 
 def add(metadata: QueryMetaData, aspect: Aspect, value: Any) -> Dict[str, str]:
+    """
+    Adds a given value to the given aspect.
+    :param metadata: metadata about the query.
+    :param aspect: aspect to operate on.
+    :param value: value to add to aspect.
+    :return: dictionary representing json for a Slack response.
+    """
+    logging.info(f"'add' command invoked on {aspect.name} by {metadata.user_id}")
     if metadata.user_id not in aspect.allowed_users:
         logging.warning(
             f"Unauthorized user attempted to execute add command on {aspect.name} Aspect."
@@ -78,20 +86,33 @@ def add(metadata: QueryMetaData, aspect: Aspect, value: Any) -> Dict[str, str]:
     query = datastore_client.query(kind=DATA_KEY_CAMPAIGN).fetch()
     result = query.next()
 
-    party_xp = result[aspect.name]
-    new_xp = party_xp + value
-    result[aspect.name] = new_xp
+    current_value = result[aspect.name]
+    new_value = current_value + value
+    result[aspect.name] = new_value
     datastore_client.put(result)
 
-    logging.info(f"Updated {aspect.name} to {new_xp}")
+    logging.info(f"Updated {aspect.name} to {new_value}")
 
     return {
         "response_type": MESSAGE_RESPONSE_CHANNEL,
-        "text": f"Updated {aspect.name} to {new_xp}",
+        "text": f"Updated {aspect.name} to {new_value}",
     }
 
 
-# List of commands used to build out
+def current(metadata: QueryMetaData, aspect: Aspect) -> Dict[str, str]:
+    """
+    Returns the current value for a given aspect.
+    :param metadata: metadata about the query.
+    :param aspect: aspect to operate on.
+    :return: dictionary representing json for a Slack response.
+    """
+    logging.info(f"'current' command invoked on {aspect.name} by {metadata.user_id}")
+    datastore_client = create_client(PROJECT_ID)
+    query = datastore_client.query(kind=DATA_KEY_CAMPAIGN).fetch()
+    result = query.next()
+    current_value = result[aspect.name]
+
+
 command_list: List[Command] = [
     Command("default", "", default_response),
     Command("help", "retrieves help info", help_message),
